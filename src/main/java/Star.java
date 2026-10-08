@@ -5,23 +5,24 @@ import java.util.Scanner;
  * Quarter 1 Project
  * Star Information
  */
-
 public class Star
 {
-    //Fields
+    // Fields
     private String starName;
     private double mass;
+
     private double pcentHydrogen;
     private double pcentHelium;
     private double pcentHeavyElements;
+
     private double xPosition;
     private double yPosition;
     private double zPosition;
+
     private double radius;
     private double surfTemp;
 
-    //Default Constructor
-    public Star (boolean custom)
+    public Star(boolean custom)
     {
         if (custom)
         {
@@ -30,51 +31,62 @@ public class Star
             System.out.print("Enter star name: ");
             starName = scanner.nextLine();
 
-            System.out.print("Enter mass: ");
+            System.out.print("Enter star mass: ");
             mass = scanner.nextDouble();
 
-            System.out.print("Enter hydrogen percentage: ");
+            System.out.print("Enter percentage of hydrogen: ");
             pcentHydrogen = scanner.nextDouble();
 
-            System.out.print("Enter helium percentage: ");
+            System.out.print("Enter percentage of helium: ");
             pcentHelium = scanner.nextDouble();
 
-            System.out.print("Enter heavy element percentage: ");
-            pcentHeavyElements =  scanner.nextDouble();
+            System.out.print(
+                    "Enter percentage of heavy elements: ");
 
-            System.out.print("Enter X coordinate: ");
+            pcentHeavyElements = scanner.nextDouble();
+
+            System.out.print("Enter star X position (AU): ");
             xPosition = scanner.nextDouble();
 
-            System.out.print("Enter Y coordinate: ");
+            System.out.print("Enter star Y position (AU): ");
             yPosition = scanner.nextDouble();
 
-            System.out.print("Enter Z coordinate: ");
+            System.out.print("Enter star Z position (AU): ");
             zPosition = scanner.nextDouble();
 
-            System.out.print("Enter radius: ");
+            System.out.print("Enter star radius (m): ");
             radius = scanner.nextDouble();
 
-            System.out.print("Enter surface temperature: ");
+            System.out.print(
+                    "Enter star surface temperature (K): ");
+
             surfTemp = scanner.nextDouble();
         }
-
         else
         {
-            // Create the Sun
-            this.starName = "Sun";
-            this.mass = 1.989e30;
-            this.pcentHydrogen = 71.0;
-            this.pcentHelium = 27.1;
-            this.pcentHeavyElements = 1.9;
-            this.xPosition = 0;
-            this.yPosition = 0;
-            this.zPosition = 0;
-            this.radius = 6.957e8;
-            this.surfTemp = 5800;
+            // Default Sun.
+            starName = "Sun";
+
+            mass = 1.989e30;
+
+            pcentHydrogen = 71.0;
+            pcentHelium = 27.1;
+            pcentHeavyElements = 1.9;
+
+            xPosition = 0;
+            yPosition = 0;
+            zPosition = 0;
+
+            radius = 6.957e8;
+
+            surfTemp = 5800;
         }
     }
 
-    //Getter Methods
+    
+    // GETTER METHODS
+    
+
     public String getName()
     {
         return starName;
@@ -125,48 +137,31 @@ public class Star
         return surfTemp;
     }
 
-    //Setter Methods
-    public void setName(String newName)
-    {
-        starName = newName;
-    }
+    
+    // CHANGE POSITION
+    
 
-    public void setX(double newX)
-    {
-        xPosition = newX;
-    }
-
-    public void setY(double newY)
-    {
-        yPosition = newY;
-    }
-
-    public void setZ(double newZ)
-    {
-        zPosition = newZ;
-    }
-
-    public void setRadius(double newRadius)
-    {
-        radius = newRadius;
-    }
-
-    public void setSurfTemp(double newTemp)
-    {
-        surfTemp = newTemp;
-    }
-
-    //Change Position
-    public void changePosition(double newX, double newY, double newZ)
+    public void changePosition(
+            double newX,
+            double newY,
+            double newZ)
     {
         xPosition = newX;
         yPosition = newY;
         zPosition = newZ;
     }
 
-    //Print Position
+    
+    // PRINT POSITION
+    
+
     public void printPosition()
     {
-        System.out.println("Star " + starName + " coordinates: (" + xPosition + ", " + yPosition + ", " + zPosition + ")");
+        System.out.println(
+                "Star " + starName
+                        + " coordinates: ("
+                        + xPosition + ", "
+                        + yPosition + ", "
+                        + zPosition + ")");
     }
 }

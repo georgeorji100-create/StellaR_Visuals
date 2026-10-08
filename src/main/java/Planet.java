@@ -7,16 +7,25 @@ import java.util.Scanner;
  */
 public class Planet
 {
-    //Fields
+    // Fields
     private String planetName;
     private double mass;
+
+    // Position in AU.
     private double xPosition;
     private double yPosition;
     private double zPosition;
+
+    // Physical properties.
     private double radius;
     private double surfTemp;
 
-    public Planet (boolean custom)
+    // Velocity in meters per second.
+    private double xVelocity;
+    private double yVelocity;
+    private double zVelocity;
+
+    public Planet(boolean custom)
     {
         if (custom)
         {
@@ -28,32 +37,49 @@ public class Planet
             System.out.print("Enter planet mass: ");
             mass = scanner.nextDouble();
 
-            System.out.print("Enter planet X position: ");
-            mass = scanner.nextDouble();
+            System.out.print("Enter planet X position (AU): ");
+            xPosition = scanner.nextDouble();
 
-            System.out.print("Enter planet Y position: ");
-            mass = scanner.nextDouble();
+            System.out.print("Enter planet Y position (AU): ");
+            yPosition = scanner.nextDouble();
 
-            System.out.print("Enter planet radius: ");
-            mass = scanner.nextDouble();
+            System.out.print("Enter planet Z position (AU): ");
+            zPosition = scanner.nextDouble();
 
-            System.out.print("Enter planet surface temperatre: ");
-            mass = scanner.nextDouble();
+            System.out.print("Enter planet radius (m): ");
+            radius = scanner.nextDouble();
+
+            System.out.print(
+                    "Enter planet surface temperature in Kelvin: ");
+
+            surfTemp = scanner.nextDouble();
         }
-
         else
         {
+            // Default Earth.
             planetName = "Earth";
+
             mass = 5.9722e24;
+
             xPosition = 1;
             yPosition = 0;
             zPosition = 0;
+
             radius = 6.371e6;
-            surfTemp = 15;
+
+            surfTemp = 288;
+
+            // Earth's approximate orbital velocity.
+            xVelocity = 0;
+            yVelocity = 29780;
+            zVelocity = 0;
         }
     }
 
-    // Getter Methods
+    
+    // GETTER METHODS
+    
+
     public String getName()
     {
         return planetName;
@@ -89,7 +115,27 @@ public class Planet
         return surfTemp;
     }
 
-    // Setter Methods
+    // Velocity getters.
+
+    public double getXVelocity()
+    {
+        return xVelocity;
+    }
+
+    public double getYVelocity()
+    {
+        return yVelocity;
+    }
+
+    public double getZVelocity()
+    {
+        return zVelocity;
+    }
+
+    
+    // SETTER METHODS
+    
+
     public void setName(String newName)
     {
         planetName = newName;
@@ -115,23 +161,53 @@ public class Planet
         radius = newRadius;
     }
 
-    public void setSurfTemp(double newTempF)
+    public void setSurfTemp(double newTemp)
     {
-        radius = newTempF;
+        surfTemp = newTemp;
     }
 
-    // Change Position
-    public void changePosition(double newX, double newY, double newZ)
+    // Velocity setters.
+
+    public void setXVelocity(double newVelocity)
+    {
+        xVelocity = newVelocity;
+    }
+
+    public void setYVelocity(double newVelocity)
+    {
+        yVelocity = newVelocity;
+    }
+
+    public void setZVelocity(double newVelocity)
+    {
+        zVelocity = newVelocity;
+    }
+
+    
+    // CHANGE POSITION
+    
+
+    public void changePosition(
+            double newX,
+            double newY,
+            double newZ)
     {
         xPosition = newX;
         yPosition = newY;
         zPosition = newZ;
     }
 
-    // Print Position
+    
+    // PRINT POSITION
+    
+
     public void printPosition()
     {
-        System.out.println("Planet " + planetName + " coordinates: (" + xPosition + ", "
-                + yPosition + ", " + zPosition + ")");
+        System.out.println(
+                "Planet " + planetName
+                        + " coordinates: ("
+                        + xPosition + ", "
+                        + yPosition + ", "
+                        + zPosition + ")");
     }
 }
