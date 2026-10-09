@@ -49,10 +49,17 @@ public class Planet
             System.out.print("Enter planet radius (m): ");
             radius = scanner.nextDouble();
 
-            System.out.print(
-                    "Enter planet surface temperature in Kelvin: ");
-
+            System.out.print("Enter planet surface temperature in Kelvin: ");
             surfTemp = scanner.nextDouble();
+
+            System.out.print("Enter planet xVelocity (m/s): ");
+            xVelocity = scanner.nextDouble();
+
+            System.out.print("Enter planet yVelocity (m/s): ");
+            yVelocity = scanner.nextDouble();
+
+            System.out.print("Enter planet zVelocity (m/s): ");
+            zVelocity = scanner.nextDouble();
         }
         else
         {
@@ -76,10 +83,8 @@ public class Planet
         }
     }
 
-    
-    // GETTER METHODS
-    
 
+    // GETTER METHODS
     public String getName()
     {
         return planetName;
@@ -110,7 +115,7 @@ public class Planet
         return radius;
     }
 
-    public double getsurfTemp()
+    public double getSurfTemp()
     {
         return surfTemp;
     }
@@ -132,10 +137,8 @@ public class Planet
         return zVelocity;
     }
 
-    
-    // SETTER METHODS
-    
 
+    // SETTER METHODS
     public void setName(String newName)
     {
         planetName = newName;
@@ -183,31 +186,35 @@ public class Planet
         zVelocity = newVelocity;
     }
 
-    
     // CHANGE POSITION
-    
-
-    public void changePosition(
-            double newX,
-            double newY,
-            double newZ)
+    public void changePosition(double newX, double newY, double newZ)
     {
         xPosition = newX;
         yPosition = newY;
         zPosition = newZ;
     }
 
-    
     // PRINT POSITION
-    
-
     public void printPosition()
     {
-        System.out.println(
-                "Planet " + planetName
-                        + " coordinates: ("
-                        + xPosition + ", "
-                        + yPosition + ", "
+        System.out.println("Planet " + planetName + " coordinates: ("
+                        + xPosition + ", " + yPosition + ", "
                         + zPosition + ")");
+    }
+
+
+    private static final double METERS_PER_AU = 1.496e11;
+
+    public void updatePosition(double timeStep)
+    {
+        // Calculate displacement in meters, then convert to AU.
+        double changeX = (xVelocity * timeStep) / METERS_PER_AU;
+        double changeY = (yVelocity * timeStep) / METERS_PER_AU;
+        double changeZ = (zVelocity * timeStep) / METERS_PER_AU;
+
+        // Update the planet's coordinates.
+        xPosition += changeX;
+        yPosition += changeY;
+        zPosition += changeZ;
     }
 }

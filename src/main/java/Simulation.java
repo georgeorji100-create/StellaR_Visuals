@@ -5,27 +5,26 @@ import javafx.scene.shape.Sphere;
 
 public class Simulation
 {
+    private Planet planet;
+    private Sphere planetary;
     private Group root;
 
     // Converts real star radius into JavaFX screen size.
     private double scaleFactor = 50 / 6.957e8;
 
     // Converts AU into JavaFX screen distance.
-    // 1 AU = 150 screen units.
-    private double distanceScale = 150;
+    private double distanceScale = 250;
 
     public Simulation(Star star, Planet planet)
     {
+        this.planet = planet;
         root = new Group();
 
         // Move the origin to the center of the screen.
-        root.setTranslateX(500);
-        root.setTranslateY(350);
+        root.setTranslateX(0);
+        root.setTranslateY(0);
 
-        
         // STAR
-        
-
         double starRadius =
                 star.getRadius() * scaleFactor;
 
@@ -85,27 +84,13 @@ public class Simulation
 
         root.getChildren().add(stellar);
 
-        
         // PLANET
-        
+        double planetRadius = Math.max(planet.getRadius() * scaleFactor, 5);
+        planetary = new Sphere(planetRadius);
 
-        // Make sure very small planets are still visible.
-        double planetRadius =
-                Math.max(
-                        planet.getRadius() * scaleFactor,
-                        5);
-
-        Sphere planetary =
-                new Sphere(planetRadius);
-
-        planetary.setTranslateX(
-                planet.getX() * distanceScale);
-
-        planetary.setTranslateY(
-                planet.getY() * distanceScale);
-
-        planetary.setTranslateZ(
-                planet.getZ() * distanceScale);
+        planetary.setTranslateX(planet.getX() * distanceScale);
+        planetary.setTranslateY(planet.getY() * distanceScale);
+        planetary.setTranslateZ(planet.getZ() * distanceScale);
 
         PhongMaterial planetaryMaterial =
                 new PhongMaterial();
@@ -115,6 +100,8 @@ public class Simulation
         planetary.setMaterial(planetaryMaterial);
 
         root.getChildren().add(planetary);
+
+
     }
 
     // Add a new star to the simulation.
@@ -173,6 +160,50 @@ public class Simulation
         planetary.setMaterial(planetaryMaterial);
 
         root.getChildren().add(planetary);
+    }
+
+    public void physicsImplement(Star star, Planet planet, double timeStep)
+    {
+        // Create the calculators.
+        Acceleration accelerationCalculator = new Acceleration();
+        Velocity velocityCalculator = new Velocity();
+
+        // 1. Calculate acceleration in all three directions.
+        double ax = accelerationCalculator.calculateAX(star, planet);
+        double ay = accelerationCalculator.calculateAY(star, planet);
+        double az = accelerationCalculator.calculateAZ(star, planet);
+
+        // 2. Update the planet's velocity.
+        velocityCalculator.updateVelocity(planet, ax, ay, az, timeStep);
+
+        // 3. Update the planet's position.
+        planet.updatePosition(timeStep);
+    }
+
+    public void updatePlanetDisplay()
+    {
+        // Convert Earth's position from AU into JavaFX screen units.
+        double screenX = planet.getX() * distanceScale;
+        double screenY = planet.getY() * distanceScale;
+        double screenZ = planet.getZ() * distanceScale;
+
+        // Move the visible Earth sphere to the calculated coordinates.
+        planetary.setTranslateX(screenX);
+        planetary.setTranslateY(screenY);
+        planetary.setTranslateZ(screenZ);
+    }
+
+    //Debugger
+    public void printOrbitalDistance()
+    {
+        // Calculate the distance from the Sun to Earth in AU.
+        double x = planet.getX();
+        double y = planet.getY();
+        double z = planet.getZ();
+
+        double distance = Math.sqrt(x * x + y * y + z * z);
+
+        System.out.printf("Sun-Earth distance: " + distance);
     }
 
     // Gives Main access to the JavaFX Group.

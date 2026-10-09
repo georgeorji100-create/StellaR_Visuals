@@ -1,10 +1,13 @@
 import javafx.application.Application;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.PerspectiveCamera;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import java.util.Scanner;
 import javafx.scene.transform.Rotate;
+import javafx.animation.AnimationTimer;
+import javafx.scene.input.KeyCode;
 
 public class Main extends Application
 {
@@ -12,12 +15,12 @@ public class Main extends Application
     private static Planet planet;
 
     private static Simulation simulation;
+    private static double simulationSpeed = 1000000.0;
+    private static final double MAX_PHYSICS_STEP = 100;
 
     @Override
     public void start(Stage stage)
     {
-        // Create the simulation using the star and planet
-        // selected by the user.
         simulation = new Simulation(star, planet);
 
         // Create the 3D scene.
@@ -31,22 +34,72 @@ public class Main extends Application
         scene.setFill(Color.rgb(5, 5, 20));
 
         // Create the 3D camera.
-        PerspectiveCamera camera = new PerspectiveCamera();
+        PerspectiveCamera camera = new PerspectiveCamera(true);
+        camera.setNearClip(0.1);
+        camera.setFarClip(100000);
 
         camera.setTranslateX(0);
         camera.setTranslateY(0);
-        camera.setTranslateZ(-500);
+        camera.setTranslateZ(-1000);
 
         scene.setCamera(camera);
 
-        // Set up keyboard and mouse controls.
         cameraControls(scene, camera);
 
         stage.setTitle("StellaR System Simulation");
-
         stage.setScene(scene);
-
         stage.show();
+
+        // Run the physics repeatedly while the JavaFX window is open.
+        AnimationTimer timer = new AnimationTimer()
+        {
+            private long lastUpdate = 0;
+            private int debugCounter = 0;
+
+            @Override
+            public void handle(long now)
+            {
+                // Skip the first frame to establish a starting timestamp.
+                if (lastUpdate == 0)
+                {
+                    lastUpdate = now;
+                    return;
+                }
+
+                // Convert real time from nanoseconds to seconds.
+                double elapsedSeconds = (now - lastUpdate) / 1e9;
+                lastUpdate = now;
+
+                double elapsed = Math.min(elapsedSeconds, 0.05);
+
+                double timeStep = elapsed * simulationSpeed;
+
+                int steps = Math.max
+                        (
+                            1, (int) Math.ceil(timeStep / MAX_PHYSICS_STEP)
+                        );
+
+                double dt = timeStep / steps;
+
+                for (int i = 0; i < steps; i++)
+                {
+                    simulation.physicsImplement(star, planet, dt);
+                }
+
+                simulation.updatePlanetDisplay();
+
+                //Debugger
+                debugCounter++;
+
+                if (debugCounter >= 60)
+                {
+                    simulation.printOrbitalDistance();
+                    debugCounter = 0;
+                }
+            }
+        };
+
+        timer.start();
     }
 
     // Ask the user which objects they want to create.
@@ -94,144 +147,27 @@ public class Main extends Application
     }
 
     // Set up camera movement and rotation.
+
+
     public void cameraControls(Scene scene, PerspectiveCamera camera)
     {
-        // Create separate rotations for the X and Y axes.
-        Rotate rotateX = new Rotate(0, Rotate.X_AXIS);
+        Group cameraPivot = new Group();
+
         Rotate rotateY = new Rotate(0, Rotate.Y_AXIS);
+        Rotate rotateX = new Rotate(-20, Rotate.X_AXIS);
 
-        camera.getTransforms().addAll(rotateX, rotateY);
+        cameraPivot.getTransforms().addAll(rotateY, rotateX);
 
-        // Keyboard controls.
-        scene.setOnKeyPressed(event ->
-        {
-            double angle = Math.toRadians(rotateY.getAngle());
+        camera.setTranslateX(0);
+        camera.setTranslateY(0);
+        camera.setTranslateZ(-1000);
 
-            // Determine which direction the camera is facing.
-            double forwardX = Math.sin(angle);
-            double forwardZ = Math.cos(angle);
+        cameraPivot.getChildren().add(camera);
 
-            double speed = 10;
+        ((Group) scene.getRoot()).getChildren().add(cameraPivot);
 
-            switch (event.getCode())
-            {
-                // Move forward.
-                case W:
-                    camera.setTranslateX(
-                            camera.getTranslateX() + forwardX * speed);
+        scene.setCamera(camera);
 
-                    camera.setTranslateZ(
-                            camera.getTranslateZ() + forwardZ * speed);
-                    break;
-
-                // Move backward.
-                case S:
-                    camera.setTranslateX(
-                            camera.getTranslateX() - forwardX * speed);
-
-                    camera.setTranslateZ(
-                            camera.getTranslateZ() - forwardZ * speed);
-                    break;
-
-                // Strafe right.
-                case D:
-                    camera.setTranslateX(
-                            camera.getTranslateX() + forwardZ * speed);
-
-                    camera.setTranslateZ(
-                            camera.getTranslateZ() - forwardX * speed);
-                    break;
-
-                // Strafe left.
-                case A:
-                    camera.setTranslateX(
-                            camera.getTranslateX() - forwardZ * speed);
-
-                    camera.setTranslateZ(
-                            camera.getTranslateZ() + forwardX * speed);
-                    break;
-
-                // Move upward.
-                case Q:
-                    camera.setTranslateY(
-                            camera.getTranslateY() - speed);
-                    break;
-
-                // Move downward.
-                case E:
-                    camera.setTranslateY(
-                            camera.getTranslateY() + speed);
-                    break;
-
-                // Reset camera.
-                case R:
-                    camera.setTranslateX(0);
-                    camera.setTranslateY(0);
-                    camera.setTranslateZ(-500);
-
-                    rotateX.setAngle(0);
-                    rotateY.setAngle(0);
-                    break;
-
-                // Add a new star or planet.
-                case N:
-
-                    Scanner scanner = new Scanner(System.in);
-
-                    System.out.println("Add Planet/Star:");
-                    System.out.println("1. Create Star");
-                    System.out.println("2. Create Planet");
-                    System.out.print("Enter your choice: ");
-
-                    int addChoice = scanner.nextInt();
-
-                    if (addChoice == 1)
-                    {
-                        // Create a new star.
-                        star = new Star(false);
-
-                        System.out.print("Enter star X position (AU): ");
-                        double sX = scanner.nextDouble();
-
-                        System.out.print("Enter star Y position (AU): ");
-                        double sY = scanner.nextDouble();
-
-                        star.changePosition(sX, sY, 0);
-
-                        // Add the star to the JavaFX scene.
-                        simulation.addStar(star);
-                    }
-                    else
-                    {
-                        // Create a new planet.
-                        planet = new Planet(false);
-
-                        System.out.print("Enter planet X position (AU): ");
-                        double pX = scanner.nextDouble();
-
-                        System.out.print("Enter planet Y position (AU): ");
-                        double pY = scanner.nextDouble();
-
-                        planet.changePosition(pX, pY, 0);
-
-                        // Add the planet to the JavaFX scene.
-                        simulation.addPlanet(planet);
-                    }
-
-                    break;
-            }
-        });
-
-        // Zoom in and out with the mouse wheel.
-        scene.setOnScroll(event ->
-        {
-            double zoom = event.getDeltaY();
-
-            camera.setTranslateZ(
-                    camera.getTranslateZ() + zoom);
-        });
-
-        // Store the mouse's previous position.
         final double[] mouseX = {0};
         final double[] mouseY = {0};
 
@@ -241,27 +177,79 @@ public class Main extends Application
             mouseY[0] = event.getSceneY();
         });
 
-        // Rotate the camera when dragging the mouse.
         scene.setOnMouseDragged(event ->
         {
-            double changeX =
-                    event.getSceneX() - mouseX[0];
+            double dx = event.getSceneX() - mouseX[0];
+            double dy = event.getSceneY() - mouseY[0];
 
-            double changeY =
-                    event.getSceneY() - mouseY[0];
+            rotateY.setAngle(rotateY.getAngle() + dx * 0.4);
 
-            double mouseSensitivity = 0.05;
-
-            rotateY.setAngle(
-                    rotateY.getAngle()
-                            + changeX * mouseSensitivity);
-
-            rotateX.setAngle(
-                    rotateX.getAngle()
-                            + changeY * mouseSensitivity);
+            double newAngleX = rotateX.getAngle() + dy * 0.4;
+            rotateX.setAngle(Math.max(-85, Math.min(85, newAngleX)));
 
             mouseX[0] = event.getSceneX();
             mouseY[0] = event.getSceneY();
+        });
+
+        // Scroll to zoom in and out.
+        scene.setOnScroll(event ->
+        {
+            double zoomAmount = event.getDeltaY() * 0.5;
+            double newZ = camera.getTranslateZ() + zoomAmount;
+
+            // Prevent zooming too close or too far away.
+            camera.setTranslateZ(Math.max(-5000, Math.min(-200, newZ)));
+        });
+
+        // Keyboard controls.
+        scene.setOnKeyPressed(event ->
+        {
+            double speed = 20;
+
+            switch (event.getCode())
+            {
+                // Move forward and backward.
+                case W:
+                    camera.setTranslateZ(
+                            Math.min(-200, camera.getTranslateZ() + speed));
+                    break;
+
+                case S:
+                    camera.setTranslateZ(
+                            Math.max(-5000, camera.getTranslateZ() - speed));
+                    break;
+
+                // Move left and right.
+                case A:
+                    camera.setTranslateX(camera.getTranslateX() - speed);
+                    break;
+
+                case D:
+                    camera.setTranslateX(camera.getTranslateX() + speed);
+                    break;
+
+                // Move vertically.
+                case Q:
+                    camera.setTranslateY(camera.getTranslateY() - speed);
+                    break;
+
+                case E:
+                    camera.setTranslateY(camera.getTranslateY() + speed);
+                    break;
+
+                // Reset the camera to its starting position.
+                case R:
+                    rotateX.setAngle(-20);
+                    rotateY.setAngle(0);
+
+                    camera.setTranslateX(0);
+                    camera.setTranslateY(0);
+                    camera.setTranslateZ(-1000);
+                    break;
+
+                default:
+                    break;
+            }
         });
     }
 
